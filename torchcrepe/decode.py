@@ -41,10 +41,6 @@ def weighted_argmax(logits):
     # Ensure devices are the same (no-op if they are)
     weighted_argmax.weights = weighted_argmax.weights.to(logits.device)
 
-    # Convert to probabilities
-    with torch.no_grad():
-        probs = torch.sigmoid(logits)
-
     # Apply weights
     cents = (weighted_argmax.weights * probs).sum(dim=1) / probs.sum(dim=1)
 
