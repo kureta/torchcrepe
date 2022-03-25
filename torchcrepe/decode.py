@@ -42,7 +42,7 @@ def weighted_argmax(logits):
     weighted_argmax.weights = weighted_argmax.weights.to(logits.device)
 
     # Apply weights
-    cents = (weighted_argmax.weights * probs).sum(dim=1) / probs.sum(dim=1)
+    cents = (weighted_argmax.weights * logits).sum(dim=1) / logits.sum(dim=1)
 
     # Convert to frequency in Hz
     return bins, torchcrepe.convert.cents_to_frequency(cents)
@@ -57,19 +57,15 @@ def viterbi(logits):
         transition = transition / transition.sum(axis=1, keepdims=True)
         viterbi.transition = transition
 
-    # Normalize logits
-    with torch.no_grad():
-        probs = torch.nn.functional.softmax(logits, dim=1)
-
     # Convert to numpy
-    sequences = probs.cpu().numpy()
+    sequences = logits.cpu().numpy()
 
     # Perform viterbi decoding
     bins = [librosa.sequence.viterbi(sequence, viterbi.transition)
             for sequence in sequences]
 
     # Convert to pytorch
-    bins = torch.tensor(bins, device=probs.device)
+    bins = torch.tensor(bins, device=logits.device)
 
     # Convert to frequency in Hz
     return bins, torchcrepe.convert.bins_to_frequency(bins)
