@@ -598,8 +598,8 @@ def postprocess(probabilities,
                                                   torch.ceil)
 
     # Remove frequencies outside of allowable range
-    probabilities[:, :minidx] = -float('inf')
-    probabilities[:, maxidx:] = -float('inf')
+    probabilities[:, :minidx] = 0.0
+    probabilities[:, maxidx:] = 0.0
 
     # Perform argmax or viterbi sampling
     bins, pitch = decoder(probabilities)

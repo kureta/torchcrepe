@@ -30,8 +30,8 @@ def weighted_argmax(logits):
     # Mask out everything outside of window
     for batch in range(logits.size(0)):
         for time in range(logits.size(2)):
-            logits[batch, :start[batch, time], time] = -float('inf')
-            logits[batch, end[batch, time]:, time] = -float('inf')
+            logits[batch, :start[batch, time], time] = 0.0
+            logits[batch, end[batch, time]:, time] = 0.0
 
     # Construct weights
     if not hasattr(weighted_argmax, 'weights'):
@@ -61,8 +61,8 @@ def viterbi(logits):
     sequences = logits.cpu().numpy()
 
     # Perform viterbi decoding
-    bins = [librosa.sequence.viterbi(sequence, viterbi.transition)
-            for sequence in sequences]
+    bins = np.array([librosa.sequence.viterbi(sequence, viterbi.transition)
+                     for sequence in sequences], dtype='int32')
 
     # Convert to pytorch
     bins = torch.tensor(bins, device=logits.device)
