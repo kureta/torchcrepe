@@ -103,6 +103,7 @@ def predict(audio,
         return_periodicity = return_harmonicity
 
     results = []
+    probs = []
 
     # Postprocessing breaks gradients, so just don't compute them
     with torch.no_grad():
@@ -123,6 +124,8 @@ def predict(audio,
             probabilities = probabilities.reshape(
                 audio.size(0), -1, PITCH_BINS).transpose(1, 2)
 
+            probs.append(probabilities)
+
             # Convert probabilities to F0 and periodicity
             result = postprocess(probabilities,
                                  fmin,
@@ -142,7 +145,7 @@ def predict(audio,
     # Split pitch and periodicity
     if return_periodicity:
         pitch, periodicity = zip(*results)
-        return torch.cat(pitch, 1), torch.cat(periodicity, 1)
+        return torch.cat(pitch, 1), torch.cat(periodicity, 1), torch.cat(probs, 2)
 
     # Concatenate
     return torch.cat(results, 1)
